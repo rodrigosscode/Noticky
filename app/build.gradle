@@ -1,0 +1,80 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    id 'com.google.devtools.ksp'
+}
+
+android {
+    namespace 'br.com.sscode.noticky'
+    compileSdk 33
+
+    defaultConfig {
+        applicationId "br.com.sscode.noticky"
+        minSdk 24
+        targetSdk 33
+        versionCode 10000
+        versionName "1.0.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        debug {
+            applicationIdSuffix ".debug"
+            debuggable true
+        }
+        staging {
+            applicationIdSuffix ".staging"
+            minifyEnabled false
+        }
+        release {
+            applicationIdSuffix ".release"
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+    buildFeatures {
+        viewBinding true
+    }
+}
+
+dependencies {
+
+    // OTHER MODULES
+    implementation project(':core')
+    implementation project(':testing')
+
+    // UI
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.8.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+
+    // NAVIGATION FLOW
+    implementation "androidx.navigation:navigation-fragment-ktx:$navigation_version"
+    implementation "androidx.navigation:navigation-ui-ktx:$navigation_version"
+
+    // DI
+    implementation "com.google.dagger:hilt-android:$hilt_version"
+    ksp "com.google.dagger:hilt-android-compiler:$hilt_version"
+
+    // DATABASE INTERFACE
+    implementation "androidx.room:room-runtime:$room_version"
+    ksp "androidx.room:room-compiler:$room_version"
+
+    // CACHE
+    implementation "androidx.datastore:datastore-preferences:$datastore_version"
+
+    // LOGGING
+    implementation "com.jakewharton.timber:timber:$timber_version"
+
+    // WORK BACKGROUND
+    implementation "androidx.work:work-runtime-ktx:$work_version"
+}
