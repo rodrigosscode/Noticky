@@ -21,26 +21,31 @@ android {
     buildTypes {
         debug {
             applicationIdSuffix ".debug"
+            versionNameSuffix "-debug"
             debuggable true
         }
         staging {
             applicationIdSuffix ".staging"
+            versionNameSuffix "-staging"
             minifyEnabled false
         }
         release {
-            applicationIdSuffix ".release"
+            versionNameSuffix "-release"
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
     kotlinOptions {
         jvmTarget = '1.8'
     }
+
     buildFeatures {
         viewBinding true
     }
@@ -53,9 +58,9 @@ dependencies {
     implementation project(':testing')
 
     // UI
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.8.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation "androidx.appcompat:appcompat:$appcompat_version"
+    implementation "com.google.android.material:material:$materialui_version"
+    implementation "androidx.constraintlayout:constraintlayout:$constraintlayout_version"
 
     // NAVIGATION FLOW
     implementation "androidx.navigation:navigation-fragment-ktx:$navigation_version"
