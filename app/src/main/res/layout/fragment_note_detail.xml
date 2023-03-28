@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/note_detail_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:orientation="vertical"
+    android:transitionName="@string/note_transition_name">
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/note_item_container_dimen_16dp">
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/note_title"
+                style="@style/Noticky.EditText.Bold"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/note_title"
+                android:text="@string/hello_blank_fragment"
+                android:textSize="@dimen/note_item_title_dimen_24sp" />
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/note_description"
+                style="@style/Noticky.EditText.Regular"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:hint="@string/note_description"
+                android:text="@string/lorem_ipsum"
+                android:textSize="@dimen/note_item_description_dimen_16sp" />
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.appcompat.widget.LinearLayoutCompat>

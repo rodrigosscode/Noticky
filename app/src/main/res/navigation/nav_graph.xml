@@ -3,12 +3,24 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/FirstFragment">
+    app:startDestination="@id/noteListFragment">
 
     <fragment
-        android:id="@+id/FirstFragment"
-        android:name="br.com.sscode.noticky.presentation.ui.fragment.FirstFragment"
-        android:label="@string/first_fragment_label"
-        tools:layout="@layout/fragment_first" />
+        android:id="@+id/noteListFragment"
+        android:name="br.com.sscode.noticky.presentation.ui.fragment.notelist.NoteListFragment"
+        tools:layout="@layout/fragment_note_list">
+        <action
+            android:id="@+id/action_to_noteDetail"
+            app:destination="@id/noteDetailFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/noteDetailFragment"
+        android:name="br.com.sscode.noticky.presentation.ui.fragment.notedetail.NoteDetailFragment"
+        tools:layout="@layout/fragment_note_detail">
+        <argument
+            android:name="note"
+            app:argType="br.com.sscode.noticky.domain.entity.NoteDomain" />
+    </fragment>
 
 </navigation>
