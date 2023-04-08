@@ -19,8 +19,8 @@
         android:name="br.com.sscode.noticky.presentation.ui.fragment.notedetail.NoteDetailFragment"
         tools:layout="@layout/fragment_note_detail">
         <argument
-            android:name="note"
-            app:argType="br.com.sscode.noticky.domain.entity.NoteDomain" />
+            android:name="uiMode"
+            app:argType="br.com.sscode.noticky.presentation.ui.fragment.notedetail.mode.NoteDetailUiMode" />
     </fragment>
 
 </navigation>

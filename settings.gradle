@@ -15,5 +15,6 @@ dependencyResolutionManagement {
 }
 rootProject.name = "Noticky"
 include ':app'
-include ':core'
-include ':testing'
+include ':essential:core'
+include ':essential:testing'
+include ':essential:ui'

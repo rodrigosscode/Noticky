@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace 'br.com.sscode.testing'
+    namespace 'br.com.sscode.iu'
     compileSdk 33
 
     defaultConfig {
@@ -21,25 +21,24 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-
     kotlinOptions {
         jvmTarget = '1.8'
+    }
+    buildFeatures {
+        viewBinding true
     }
 }
 
 dependencies {
-    implementation project(':core')
+    implementation project(':essential:core')
+    implementation project(':essential:testing')
 
-    api "junit:junit:$junit_version"
-    api "androidx.room:room-testing:$room_version"
-    api "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_version"
-    api "androidx.test.ext:junit:$junit_ext_version"
-    api "androidx.navigation:navigation-testing:$navigation_version"
-    api "androidx.test.espresso:espresso-core:$espresso_version"
-    api "androidx.work:work-testing:$work_version"
+    // UI
+    api "androidx.appcompat:appcompat:$appcompat_version"
+    api "com.google.android.material:material:$materialui_version"
+    api "androidx.constraintlayout:constraintlayout:$constraintlayout_version"
 }

@@ -56,13 +56,9 @@ android {
 dependencies {
 
     // OTHER MODULES
-    implementation project(':core')
-    implementation project(':testing')
-
-    // UI
-    implementation "androidx.appcompat:appcompat:$appcompat_version"
-    implementation "com.google.android.material:material:$materialui_version"
-    implementation "androidx.constraintlayout:constraintlayout:$constraintlayout_version"
+    implementation project(':essential:ui')
+    implementation project(':essential:core')
+    implementation project(':essential:testing')
 
     // NAVIGATION FLOW
     implementation "androidx.navigation:navigation-fragment-ktx:$navigation_version"

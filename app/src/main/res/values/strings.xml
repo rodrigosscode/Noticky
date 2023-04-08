@@ -47,4 +47,5 @@
     <string name="note_transition_name">note_transition</string>
     <string name="note_title">Note Title</string>
     <string name="note_description">Note Description</string>
+    <string name="add_note_content_description">Adicionar Note</string>
 </resources>
