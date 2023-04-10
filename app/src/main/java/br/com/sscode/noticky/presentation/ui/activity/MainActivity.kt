@@ -1,5 +1,6 @@
 package br.com.sscode.noticky.presentation.ui.activity
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem

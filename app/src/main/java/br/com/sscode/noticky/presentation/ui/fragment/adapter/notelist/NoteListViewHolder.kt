@@ -8,6 +8,9 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import br.com.sscode.noticky.R
 import br.com.sscode.noticky.databinding.ListNoteItemBinding
 import br.com.sscode.noticky.domain.entity.NoteDomain
+import timber.log.Timber
+
+private const val TAG_EVENT_CLICK_NOTE = "onNoteClick"
 
 class NoteListViewHolder(
     private val binding: ListNoteItemBinding
@@ -23,8 +26,8 @@ class NoteListViewHolder(
     }
 
     private fun configureDisplayFields(noteDomain: NoteDomain) = with(binding) {
-        title.text = noteDomain.title
-        description.text = noteDomain.description
+        titleView.text = noteDomain.title
+        descriptionView.text = noteDomain.description
     }
 
     private fun configureListeners(
@@ -33,7 +36,12 @@ class NoteListViewHolder(
     ) = with(binding) {
         root.setOnClickListener {
             onNoteClick(noteDomain, root)
+            logNoteClick(noteDomain)
         }
+    }
+
+    private fun logNoteClick(noteDomain: NoteDomain) {
+        Timber.i("${javaClass.simpleName}:$TAG_EVENT_CLICK_NOTE:$noteDomain")
     }
 
     private fun configureTransitions() = with(binding) {

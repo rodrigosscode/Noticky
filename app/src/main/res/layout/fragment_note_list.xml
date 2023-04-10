@@ -7,7 +7,7 @@
     android:padding="10dp">
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/notes"
+        android:id="@+id/notes_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:transitionGroup="true"
@@ -16,7 +16,7 @@
         tools:spanCount="2" />
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-        android:id="@+id/add_note"
+        android:id="@+id/add_note_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/fab_margin"
@@ -24,7 +24,7 @@
         android:contentDescription="@string/add_note_content_description"
         android:text="@string/add_note_content_description"
         app:icon="@android:drawable/ic_menu_edit"
-        app:layout_anchor="@id/notes"
+        app:layout_anchor="@id/notes_view"
         app:layout_anchorGravity="bottom|end"
         app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior" />
 

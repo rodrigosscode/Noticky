@@ -11,13 +11,17 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import br.com.sscode.core.extensions.anotherInstance
 import br.com.sscode.noticky.R
 import br.com.sscode.noticky.databinding.FragmentNoteListBinding
 import br.com.sscode.noticky.domain.entity.NoteDomain
 import br.com.sscode.noticky.presentation.ui.fragment.adapter.notelist.NoteListAdapter
 import br.com.sscode.noticky.presentation.ui.fragment.notedetail.mode.NoteDetailUiMode
 import br.com.sscode.noticky.presentation.ui.fragment.notelist.viewmodel.NoteListViewModel
+import br.com.sscode.noticky.presentation.ui.fragment.notelist.viewmodel.NoteListViewModel.NoteListUiState
+import br.com.sscode.noticky.presentation.ui.fragment.notelist.viewmodel.NoteListViewModel.NoteListUiState.*
+import br.com.sscode.noticky.presentation.ui.fragment.notelist.viewmodel.NoteListViewModel.UiAction.LoadNotes
+import br.com.sscode.noticky.presentation.ui.fragment.notelist.viewmodel.NoteListViewModel.UiState.Introducing
+import br.com.sscode.noticky.presentation.ui.fragment.notelist.viewmodel.NoteListViewModel.UiState.Loaded
 import com.google.android.material.transition.MaterialElevationScale
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
@@ -30,9 +34,14 @@ class NoteListFragment : Fragment() {
     private var _noteListBinding: FragmentNoteListBinding? = null
     private val noteListBinding: FragmentNoteListBinding
         get() = _noteListBinding ?: throw UninitializedPropertyAccessException()
-    private val noteListViewModel by viewModels<NoteListViewModel>()
-    private var isComeBackFromAnotherView: Boolean = false
-    private lateinit var noteListAdapter: NoteListAdapter
+
+    private val noteListViewModel: NoteListViewModel by viewModels()
+
+    private var isViewBindingReusable: Boolean = false
+
+    private val noteListAdapter: NoteListAdapter by lazy {
+        NoteListAdapter(this@NoteListFragment::navigateToNoteDetailEdit)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) = try {
         super.onCreate(savedInstanceState)
@@ -54,11 +63,12 @@ class NoteListFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? = try {
-        if (_noteListBinding != null) {
-            isComeBackFromAnotherView = true
-        } else {
+        _noteListBinding?.run {
+            isViewBindingReusable = true
+            this
+        } ?: run {
+            isViewBindingReusable = false
             _noteListBinding = FragmentNoteListBinding.inflate(inflater, container, false)
-            isComeBackFromAnotherView = false
         }
         noteListBinding.root
     } catch (exception: Exception) {
@@ -68,14 +78,16 @@ class NoteListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) = try {
         super.onViewCreated(view, savedInstanceState)
-        if (!isComeBackFromAnotherView) {
-            configureNoteAdapter()
+        if (isViewBindingReusable) {
+            initObserverViewState()
+            noteListViewModel.performAction(LoadNotes)
+        } else {
             configureNotesRecyclerView()
             configureAddNoteFab()
             initObserverViewState()
-        } else {
-            initObserverViewState()
-            noteListViewModel.loadNotes()
+            if (noteListViewModel.isAlreadyIntroduced()) {
+                noteListViewModel.performAction(LoadNotes)
+            }
         }
         resetSharedElementTransitionState(view)
     } catch (exception: Exception) {
@@ -87,14 +99,7 @@ class NoteListFragment : Fragment() {
         view.doOnPreDraw { startPostponedEnterTransition() }
     }
 
-    private fun configureNoteAdapter() {
-        noteListAdapter = NoteListAdapter { noteClicked, noteView ->
-            Timber.i("onNoteClicked: $noteClicked")
-            navigateToNoteDetail(uiMode = NoteDetailUiMode.Edit(noteClicked), noteView)
-        }
-    }
-
-    private fun configureNotesRecyclerView() = noteListBinding.notes.apply {
+    private fun configureNotesRecyclerView() = noteListBinding.notesView.apply {
         layoutManager = StaggeredGridLayoutManager(
             SPAN_COUNT_NOTE_LIST,
             StaggeredGridLayoutManager.VERTICAL
@@ -103,9 +108,9 @@ class NoteListFragment : Fragment() {
     }
 
     private fun configureAddNoteFab() = with(noteListBinding) {
-        addNote.shrink()
-        addNote.setOnClickListener {
-            navigateToNoteDetail(uiMode = NoteDetailUiMode.Create)
+        addNoteView.shrink()
+        addNoteView.setOnClickListener {
+            navigateToNoteDetailCreate()
         }
     }
 
@@ -113,41 +118,44 @@ class NoteListFragment : Fragment() {
         lifecycleScope.launchWhenResumed {
             uiState.collectLatest { uiState ->
                 when (uiState) {
-                    NoteListViewModel.UiState.Introducing -> {
-                        configureIntroducingAddNoteFab()
-                        noteListViewModel.loadNotes()
+                    Introducing -> {
+                        configureIntroducingAddNoteFabView()
+                        noteListViewModel.performAction(LoadNotes)
                     }
-                    is NoteListViewModel.UiState.Loaded -> {
-                        configureNoteListByState(uiState.noteListUiState)
-                    }
+                    is Loaded -> configureNoteListByState(uiState.noteListUiState)
                 }
             }
         }
     }
 
-    private fun configureNoteListByState(state: NoteListViewModel.NoteListUiState) = when (state) {
-        NoteListViewModel.NoteListUiState.Loading -> {}
-        NoteListViewModel.NoteListUiState.Empty -> {}
-        is NoteListViewModel.NoteListUiState.Error -> {}
-        is NoteListViewModel.NoteListUiState.Success -> {
-            updateNoteListData(state.data)
+    private fun configureNoteListByState(noteListUiState: NoteListUiState) =
+        when (noteListUiState) {
+            Loading -> {}
+            Empty -> {}
+            is Error -> {}
+            is Success -> updateNoteListData(noteListUiState.data)
         }
-    }
 
-    private fun configureIntroducingAddNoteFab() = with(noteListBinding) {
+    private fun configureIntroducingAddNoteFabView() = with(noteListBinding) {
         lifecycleScope.launch {
-            addNote.extend()
+            addNoteView.extend()
             TimeUnit.SECONDS.toMillis(SECONDS_INTRODUCE_FAB_ACTION).let { secondsInMillis ->
                 delay(secondsInMillis)
             }
-            addNote.shrink()
+            addNoteView.shrink()
         }
     }
 
     private fun updateNoteListData(notes: List<NoteDomain>) {
-        if (::noteListAdapter.isInitialized) {
-            noteListAdapter.submitList(notes.anotherInstance())
-        }
+        noteListAdapter.submitList(notes)
+    }
+
+    private fun navigateToNoteDetailEdit(note: NoteDomain, noteView: View) {
+        navigateToNoteDetail(uiMode = NoteDetailUiMode.Edit(note), noteView)
+    }
+
+    private fun navigateToNoteDetailCreate() {
+        navigateToNoteDetail(uiMode = NoteDetailUiMode.Create)
     }
 
     private fun navigateToNoteDetail(

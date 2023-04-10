@@ -13,7 +13,7 @@
     android:padding="@dimen/note_item_container_dimen_16dp">
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/title"
+        android:id="@+id/title_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="@font/poppins_bold"
@@ -21,7 +21,7 @@
         tools:text="Note Title" />
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/description"
+        android:id="@+id/description_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"

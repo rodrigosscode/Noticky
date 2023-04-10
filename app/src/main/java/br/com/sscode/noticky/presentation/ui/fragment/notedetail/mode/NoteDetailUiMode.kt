@@ -7,5 +7,5 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 sealed class NoteDetailUiMode : Parcelable {
     object Create : NoteDetailUiMode()
-    data class Edit(val data: NoteDomain) : NoteDetailUiMode()
+    data class Edit(val note: NoteDomain) : NoteDetailUiMode()
 }

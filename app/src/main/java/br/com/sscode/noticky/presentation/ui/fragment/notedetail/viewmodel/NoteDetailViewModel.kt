@@ -1,30 +1,73 @@
 package br.com.sscode.noticky.presentation.ui.fragment.notedetail.viewmodel
 
 import androidx.lifecycle.ViewModel
-import br.com.sscode.core.EMPTY_STRING
+import androidx.lifecycle.viewModelScope
+import br.com.sscode.core.extensions.containsValue
 import br.com.sscode.noticky.data.source.local.NotesSampleDataSourceImpl
 import br.com.sscode.noticky.domain.entity.NoteDomain
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 class NoteDetailViewModel : ViewModel() {
 
     private val dataSource = NotesSampleDataSourceImpl
 
-    private var currentData = NoteDomain(EMPTY_STRING, EMPTY_STRING)
+    private var _uiState: MutableStateFlow<UiState> = MutableStateFlow(UiState.Introducing)
+    val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
-    fun loadNewNote() {
+    private var currentDataNote: NoteDomain? = null
 
+    fun performAction(action: UiAction) {
+        when (action) {
+            UiAction.LoadNewNote -> {
+                setCurrentDataNote(NoteDomain())
+                onLoadNoteSucceeded()
+            }
+            is UiAction.LoadNote -> {
+                setCurrentDataNote(action.data)
+                onLoadNoteSucceeded()
+            }
+            is UiAction.UpdateNote -> {
+                updateNote(action.title, action.description)
+            }
+        }
     }
 
-    fun setNote(data: NoteDomain) {
-        currentData = data
+    private fun setCurrentDataNote(note: NoteDomain) {
+        currentDataNote = note
     }
 
-    fun updateNote(noteTitle: String, noteDescription: String) {
-        val newNoteItem = NoteDomain(noteTitle, noteDescription)
-        dataSource.update(currentData, newNoteItem)
+    private fun updateNote(title: String, description: String) {
+        if (title.containsValue() && description.containsValue()) {
+            currentDataNote?.run {
+                setCurrentDataNote(copy(title = title, description = description))
+                currentDataNote?.let {
+                    if(dataSource.updateOrInsert(it)) {
+                        onLoadNoteSucceeded()
+                    }
+                }
+            }
+        }
     }
+
+    private fun onLoadNoteSucceeded() = viewModelScope.launch {
+        currentDataNote?.let {
+            _uiState.emit(UiState.Loaded(it))
+        }
+    }
+
+    fun isIntroducing(): Boolean = _uiState.value == UiState.Introducing
 
     sealed class UiState {
-        data class Loaded(val data: NoteDomain)
+        object Introducing : UiState()
+        data class Loaded(val data: NoteDomain) : UiState()
+    }
+
+    sealed class UiAction {
+        object LoadNewNote : UiAction()
+        data class LoadNote(val data: NoteDomain) : UiAction()
+        data class UpdateNote(val title: String, val description: String) : UiAction()
     }
 }

@@ -12,18 +12,24 @@ import kotlinx.coroutines.launch
 
 class NoteListViewModel : ViewModel() {
 
+    private val dataSource = NotesSampleDataSourceImpl
+
     private val _uiState: MutableStateFlow<UiState> = MutableStateFlow(UiState.Introducing)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
-    private val dataSource = NotesSampleDataSourceImpl
+    fun performAction(uiAction: UiAction) = when (uiAction) {
+        UiAction.LoadNotes -> loadNotes()
+    }
 
-    fun loadNotes() {
+    private fun loadNotes() {
         onLoadNoteListSucceeded(dataSource.all().anotherInstance())
     }
 
     private fun onLoadNoteListSucceeded(data: List<NoteDomain>) = viewModelScope.launch {
         _uiState.emit(UiState.Loaded(noteListUiState = NoteListUiState.Success(data)))
     }
+
+    fun isAlreadyIntroduced(): Boolean = _uiState.value != UiState.Introducing
 
     sealed class UiState {
         object Introducing : UiState()
@@ -37,5 +43,9 @@ class NoteListViewModel : ViewModel() {
         data class Success(
             val data: List<NoteDomain> = emptyList()
         ) : NoteListUiState()
+    }
+
+    sealed class UiAction {
+        object LoadNotes : UiAction()
     }
 }
