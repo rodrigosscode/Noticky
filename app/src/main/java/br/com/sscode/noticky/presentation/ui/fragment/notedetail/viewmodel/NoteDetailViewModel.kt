@@ -43,8 +43,8 @@ class NoteDetailViewModel : ViewModel() {
         if (title.containsValue() && description.containsValue()) {
             currentDataNote?.run {
                 setCurrentDataNote(copy(title = title, description = description))
-                currentDataNote?.let {
-                    if(dataSource.updateOrInsert(it)) {
+                currentDataNote?.let { note ->
+                    if(dataSource.updateOrInsert(note)) {
                         onLoadNoteSucceeded()
                     }
                 }
@@ -53,8 +53,8 @@ class NoteDetailViewModel : ViewModel() {
     }
 
     private fun onLoadNoteSucceeded() = viewModelScope.launch {
-        currentDataNote?.let {
-            _uiState.emit(UiState.Loaded(it))
+        currentDataNote?.let { note ->
+            _uiState.emit(UiState.Loaded(data = note))
         }
     }
 

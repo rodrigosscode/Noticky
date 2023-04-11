@@ -1,4 +1,4 @@
-package br.com.sscode.ui.extensions
+package br.com.sscode.ui.extension
 
 import androidx.appcompat.widget.AppCompatEditText
 

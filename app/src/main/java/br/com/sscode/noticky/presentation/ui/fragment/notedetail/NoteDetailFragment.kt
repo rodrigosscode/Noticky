@@ -1,6 +1,5 @@
 package br.com.sscode.noticky.presentation.ui.fragment.notedetail
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -18,10 +17,9 @@ import br.com.sscode.noticky.presentation.ui.fragment.notedetail.mode.NoteDetail
 import br.com.sscode.noticky.presentation.ui.fragment.notedetail.mode.NoteDetailUiMode.Edit
 import br.com.sscode.noticky.presentation.ui.fragment.notedetail.viewmodel.NoteDetailViewModel
 import br.com.sscode.noticky.presentation.ui.fragment.notedetail.viewmodel.NoteDetailViewModel.UiAction.*
-import br.com.sscode.noticky.presentation.ui.fragment.notedetail.viewmodel.NoteDetailViewModel.UiState.Loaded
-import br.com.sscode.noticky.presentation.ui.fragment.notedetail.viewmodel.NoteDetailViewModel.UiState.Introducing
-import br.com.sscode.ui.extensions.getValueText
-import com.google.android.material.transition.MaterialContainerTransform
+import br.com.sscode.noticky.presentation.ui.fragment.notedetail.viewmodel.NoteDetailViewModel.UiState.*
+import br.com.sscode.ui.extension.getValueText
+import br.com.sscode.ui.extension.prepareEnterSharedElementWithLargeTransitions
 import timber.log.Timber
 
 class NoteDetailFragment : Fragment() {
@@ -38,18 +36,9 @@ class NoteDetailFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) = try {
         super.onCreate(savedInstanceState)
-        configureEnterSharedElementTransitions()
+        prepareEnterSharedElementWithLargeTransitions(R.id.nav_host_fragment)
     } catch (exception: Exception) {
         Timber.e(exception)
-    }
-
-    private fun configureEnterSharedElementTransitions() {
-        sharedElementEnterTransition = MaterialContainerTransform().apply {
-            drawingViewId = R.id.nav_host_fragment
-            duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
-            scrimColor = Color.WHITE
-            setAllContainerColors(Color.WHITE)
-        }
     }
 
     override fun onCreateView(
@@ -71,7 +60,7 @@ class NoteDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         try {
             super.onViewCreated(view, savedInstanceState)
-            setupToolbar()
+            setupToolbarView()
             initObserverViewState()
             if (noteDetailViewModel.isIntroducing()) {
                 loadViewStateActionByUiMode(arguments.uiMode)
@@ -81,11 +70,9 @@ class NoteDetailFragment : Fragment() {
         }
     }
 
-    private fun setupToolbar() = with(noteDetailBinding) {
-        toolbarView.setNavigationIcon(R.drawable.ic_back_screen)
-        toolbarView.setNavigationOnClickListener {
-            onBackPressed()
-        }
+    private fun setupToolbarView() = with(noteDetailBinding.toolbarView) {
+        setNavigationIcon(R.drawable.ic_back_screen)
+        setNavigationOnClickListener { onBackPressed() }
     }
 
     private fun initObserverViewState(): Unit = with(noteDetailViewModel) {
@@ -94,7 +81,7 @@ class NoteDetailFragment : Fragment() {
                 when (uiState) {
                     Introducing -> {}
                     is Loaded -> uiState.data.run {
-                        configureDisplayNoteFields(title, description)
+                        loadDetailsNoteView(title, description)
                     }
                 }
             }
@@ -104,16 +91,16 @@ class NoteDetailFragment : Fragment() {
     private fun loadViewStateActionByUiMode(uiMode: NoteDetailUiMode) = when (uiMode) {
         Create -> noteDetailViewModel.performAction(LoadNewNote)
         is Edit -> with(uiMode) {
-            loadDisplayNotePreview(note)
+            loadDetailsNotePreview(note)
             noteDetailViewModel.performAction(LoadNote(note))
         }
     }
 
-    private fun loadDisplayNotePreview(note: NoteDomain) = with(note) {
-        configureDisplayNoteFields(title, description)
+    private fun loadDetailsNotePreview(note: NoteDomain) = with(note) {
+        loadDetailsNoteView(title, description)
     }
 
-    private fun configureDisplayNoteFields(noteTitle: String, noteDescription: String) =
+    private fun loadDetailsNoteView(noteTitle: String, noteDescription: String) =
         with(noteDetailBinding) {
             noteTitleView.setText(noteTitle)
             noteDescriptionView.setText(noteDescription)
@@ -131,15 +118,17 @@ class NoteDetailFragment : Fragment() {
     private fun updateNote() {
         noteDetailViewModel.performAction(
             UpdateNote(
-                title = getNoteTitle(),
-                description = getNoteDescription()
+                title = getEditingNoteTitle(),
+                description = getEditingNoteDescription()
             )
         )
     }
 
-    private fun getNoteTitle(): String = noteDetailBinding.noteTitleView.getValueText()
+    private fun getEditingNoteTitle(): String =
+        noteDetailBinding.noteTitleView.getValueText()
 
-    private fun getNoteDescription(): String = noteDetailBinding.noteDescriptionView.getValueText()
+    private fun getEditingNoteDescription(): String =
+        noteDetailBinding.noteDescriptionView.getValueText()
 
     override fun onDestroy() {
         super.onDestroy()

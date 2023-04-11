@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.doOnPreDraw
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -22,7 +21,8 @@ import br.com.sscode.noticky.presentation.ui.fragment.notelist.viewmodel.NoteLis
 import br.com.sscode.noticky.presentation.ui.fragment.notelist.viewmodel.NoteListViewModel.UiAction.LoadNotes
 import br.com.sscode.noticky.presentation.ui.fragment.notelist.viewmodel.NoteListViewModel.UiState.Introducing
 import br.com.sscode.noticky.presentation.ui.fragment.notelist.viewmodel.NoteListViewModel.UiState.Loaded
-import com.google.android.material.transition.MaterialElevationScale
+import br.com.sscode.ui.extension.prepareEnterExitWithLargeScaleTransitions
+import br.com.sscode.ui.extension.resetSharedElementTransitionState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -45,18 +45,9 @@ class NoteListFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) = try {
         super.onCreate(savedInstanceState)
-        configureSharedElementTransitions()
+        prepareEnterExitWithLargeScaleTransitions()
     } catch (exception: Exception) {
         Timber.e(exception)
-    }
-
-    private fun configureSharedElementTransitions() {
-        exitTransition = MaterialElevationScale(false).apply {
-            duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
-        }
-        reenterTransition = MaterialElevationScale(true).apply {
-            duration = resources.getInteger(R.integer.reply_motion_duration_large).toLong()
-        }
     }
 
     override fun onCreateView(
@@ -89,14 +80,9 @@ class NoteListFragment : Fragment() {
                 noteListViewModel.performAction(LoadNotes)
             }
         }
-        resetSharedElementTransitionState(view)
+        resetSharedElementTransitionState()
     } catch (exception: Exception) {
         Timber.e(exception)
-    }
-
-    private fun resetSharedElementTransitionState(view: View) {
-        postponeEnterTransition()
-        view.doOnPreDraw { startPostponedEnterTransition() }
     }
 
     private fun configureNotesRecyclerView() = noteListBinding.notesView.apply {
@@ -109,9 +95,7 @@ class NoteListFragment : Fragment() {
 
     private fun configureAddNoteFab() = with(noteListBinding) {
         addNoteView.shrink()
-        addNoteView.setOnClickListener {
-            navigateToNoteDetailCreate()
-        }
+        addNoteView.setOnClickListener { navigateToNoteDetailCreate() }
     }
 
     private fun initObserverViewState() = with(noteListViewModel) {
@@ -133,7 +117,7 @@ class NoteListFragment : Fragment() {
             Loading -> {}
             Empty -> {}
             is Error -> {}
-            is Success -> updateNoteListData(noteListUiState.data)
+            is Success -> updateNoteListViewData(noteListUiState.data)
         }
 
     private fun configureIntroducingAddNoteFabView() = with(noteListBinding) {
@@ -146,17 +130,14 @@ class NoteListFragment : Fragment() {
         }
     }
 
-    private fun updateNoteListData(notes: List<NoteDomain>) {
+    private fun updateNoteListViewData(notes: List<NoteDomain>) =
         noteListAdapter.submitList(notes)
-    }
 
-    private fun navigateToNoteDetailEdit(note: NoteDomain, noteView: View) {
+    private fun navigateToNoteDetailEdit(note: NoteDomain, noteView: View) =
         navigateToNoteDetail(uiMode = NoteDetailUiMode.Edit(note), noteView)
-    }
 
-    private fun navigateToNoteDetailCreate() {
+    private fun navigateToNoteDetailCreate() =
         navigateToNoteDetail(uiMode = NoteDetailUiMode.Create)
-    }
 
     private fun navigateToNoteDetail(
         uiMode: NoteDetailUiMode,

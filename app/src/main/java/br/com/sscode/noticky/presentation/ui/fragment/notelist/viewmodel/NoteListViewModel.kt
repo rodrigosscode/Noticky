@@ -25,8 +25,8 @@ class NoteListViewModel : ViewModel() {
         onLoadNoteListSucceeded(dataSource.all().anotherInstance())
     }
 
-    private fun onLoadNoteListSucceeded(data: List<NoteDomain>) = viewModelScope.launch {
-        _uiState.emit(UiState.Loaded(noteListUiState = NoteListUiState.Success(data)))
+    private fun onLoadNoteListSucceeded(notes: List<NoteDomain>) = viewModelScope.launch {
+        _uiState.emit(UiState.Loaded(noteListUiState = NoteListUiState.Success(data = notes)))
     }
 
     fun isAlreadyIntroduced(): Boolean = _uiState.value != UiState.Introducing
