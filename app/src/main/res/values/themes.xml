@@ -2,7 +2,9 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.Noticky" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorPrimary">@color/yellow</item>
+        <item name="colorPrimaryContainer">@color/yellow</item>
+        <item name="colorOnPrimaryContainer">@color/black</item>
     </style>
 
     <style name="Theme.Noticky" parent="Base.Theme.Noticky" />
