@@ -22,7 +22,7 @@ class NoteListViewHolder(
     ) = with(binding) {
         configureDisplayFields(noteDomain)
         configureListeners(onNoteClick, noteDomain)
-        configureTransitions()
+        configureTransitions(noteDomain)
     }
 
     private fun configureDisplayFields(noteDomain: NoteDomain) = with(binding) {
@@ -44,9 +44,9 @@ class NoteListViewHolder(
         Timber.i("${javaClass.simpleName}:$TAG_EVENT_CLICK_NOTE:$noteDomain")
     }
 
-    private fun configureTransitions() = with(binding) {
+    private fun configureTransitions(noteDomain: NoteDomain) = with(binding) {
         root.resources.getString(R.string.note_transition_name).let { transitionName ->
-            ViewCompat.setTransitionName(root, transitionName.plus(adapterPosition))
+            ViewCompat.setTransitionName(root, transitionName.plus(noteDomain.id))
         }
     }
 
