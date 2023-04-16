@@ -5,9 +5,12 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import br.com.sscode.noticky.domain.entity.NoteDomain
+import br.com.sscode.noticky.domain.entity.isEmpty
 
 class NoteListAdapter(
-    private val onNoteClick: (noteDomain: NoteDomain, noteView: View) -> Unit
+    private val onNoteClick: (noteDomain: NoteDomain, noteView: View) -> Unit,
+    private val onEmptyNoteIdentified: (noteDomain: NoteDomain) -> Unit,
+    private val onNewNoteIdentified: () -> Unit
 ) : ListAdapter<NoteDomain, NoteListViewHolder>(NoteDiffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteListViewHolder =
@@ -15,7 +18,21 @@ class NoteListAdapter(
 
     override fun onBindViewHolder(holder: NoteListViewHolder, position: Int) {
         getItem(position).let { noteDomain ->
-            holder.bind(noteDomain, onNoteClick)
+            if (noteDomain.isEmpty()) {
+                onEmptyNoteIdentified(noteDomain)
+            } else {
+                holder.bind(noteDomain, onNoteClick)
+            }
+        }
+    }
+
+    override fun onCurrentListChanged(
+        previousList: MutableList<NoteDomain>,
+        currentList: MutableList<NoteDomain>
+    ) {
+        super.onCurrentListChanged(previousList, currentList)
+        if (currentList.size > previousList.size) {
+            onNewNoteIdentified()
         }
     }
 

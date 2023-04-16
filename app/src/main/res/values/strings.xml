@@ -42,10 +42,18 @@
         libero vel nunc consequat, quis tincidunt nisl eleifend. Cras bibendum enim a justo luctus
         vestibulum. Fusce dictum libero quis erat maximus, vitae volutpat diam dignissim.
     </string>
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <!-- TRANSITIONS -->
     <string name="note_transition_name">note_transition</string>
+
+    <!-- NOTE DETAIL -->
     <string name="note_title">Note Title</string>
     <string name="note_description">Note Description</string>
+
+    <!-- NOTE LIST -->
     <string name="add_note_content_description">Adicionar Note</string>
+    <string name="alert_remove_empty_note">Nota vazia removida</string>
 </resources>

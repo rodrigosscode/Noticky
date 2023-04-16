@@ -2,7 +2,6 @@ package br.com.sscode.noticky.presentation.ui.fragment.notedetail.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import br.com.sscode.core.extensions.containsValue
 import br.com.sscode.noticky.data.source.local.NotesSampleDataSourceImpl
 import br.com.sscode.noticky.domain.entity.NoteDomain
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,13 +39,11 @@ class NoteDetailViewModel : ViewModel() {
     }
 
     private fun updateNote(title: String, description: String) {
-        if (title.containsValue() && description.containsValue()) {
-            currentDataNote?.run {
-                setCurrentDataNote(copy(title = title, description = description))
-                currentDataNote?.let { note ->
-                    if(dataSource.updateOrInsert(note)) {
-                        onLoadNoteSucceeded()
-                    }
+        currentDataNote?.run {
+            setCurrentDataNote(copy(title = title, description = description))
+            currentDataNote?.let { note ->
+                if (dataSource.updateOrInsert(note)) {
+                    onLoadNoteSucceeded()
                 }
             }
         }

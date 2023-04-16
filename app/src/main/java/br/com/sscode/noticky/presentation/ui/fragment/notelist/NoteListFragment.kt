@@ -4,13 +4,16 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import br.com.sscode.core.FIRST_POSITION
 import br.com.sscode.noticky.R
+import br.com.sscode.noticky.R.string.alert_remove_empty_note
 import br.com.sscode.noticky.databinding.FragmentNoteListBinding
 import br.com.sscode.noticky.domain.entity.NoteDomain
 import br.com.sscode.noticky.presentation.ui.fragment.adapter.notelist.NoteListAdapter
@@ -19,15 +22,16 @@ import br.com.sscode.noticky.presentation.ui.fragment.notelist.viewmodel.NoteLis
 import br.com.sscode.noticky.presentation.ui.fragment.notelist.viewmodel.NoteListViewModel.NoteListUiState
 import br.com.sscode.noticky.presentation.ui.fragment.notelist.viewmodel.NoteListViewModel.NoteListUiState.*
 import br.com.sscode.noticky.presentation.ui.fragment.notelist.viewmodel.NoteListViewModel.UiAction.LoadNotes
+import br.com.sscode.noticky.presentation.ui.fragment.notelist.viewmodel.NoteListViewModel.UiAction.RemoveNote
 import br.com.sscode.noticky.presentation.ui.fragment.notelist.viewmodel.NoteListViewModel.UiState.Introducing
 import br.com.sscode.noticky.presentation.ui.fragment.notelist.viewmodel.NoteListViewModel.UiState.Loaded
+import br.com.sscode.ui.extension.launchDelayed
 import br.com.sscode.ui.extension.prepareEnterExitWithLargeScaleTransitions
 import br.com.sscode.ui.extension.resetSharedElementTransitionState
-import kotlinx.coroutines.delay
+import br.com.sscode.ui.extension.showSnackBarLongMessage
+import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.util.concurrent.TimeUnit
 
 class NoteListFragment : Fragment() {
 
@@ -40,7 +44,13 @@ class NoteListFragment : Fragment() {
     private var isViewBindingReusable: Boolean = false
 
     private val noteListAdapter: NoteListAdapter by lazy {
-        NoteListAdapter(this@NoteListFragment::navigateToNoteDetailEdit)
+        with(this@NoteListFragment) {
+            NoteListAdapter(
+                onNoteClick = ::navigateToNoteDetailEdit,
+                onEmptyNoteIdentified = ::removeEmptyNote,
+                onNewNoteIdentified = ::showNewNotesAtTop
+            )
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) = try {
@@ -67,33 +77,37 @@ class NoteListFragment : Fragment() {
         null
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) = try {
-        super.onViewCreated(view, savedInstanceState)
-        if (isViewBindingReusable) {
-            initObserverViewState()
-            noteListViewModel.performAction(LoadNotes)
-        } else {
-            configureNotesRecyclerView()
-            configureAddNoteFab()
-            initObserverViewState()
-            if (noteListViewModel.isAlreadyIntroduced()) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        try {
+            super.onViewCreated(view, savedInstanceState)
+            resetSharedElementTransitionState()
+            if (isViewBindingReusable) {
+                initObserverViewState()
                 noteListViewModel.performAction(LoadNotes)
+            } else {
+                configureNotesRecyclerView()
+                configureAddNoteFabView()
+                initObserverViewState()
+                if (noteListViewModel.isAlreadyIntroduced()) {
+                    noteListViewModel.performAction(LoadNotes)
+                }
             }
+        } catch (exception: Exception) {
+            Timber.e(exception)
         }
-        resetSharedElementTransitionState()
-    } catch (exception: Exception) {
-        Timber.e(exception)
     }
 
     private fun configureNotesRecyclerView() = noteListBinding.notesView.apply {
         layoutManager = StaggeredGridLayoutManager(
             SPAN_COUNT_NOTE_LIST,
             StaggeredGridLayoutManager.VERTICAL
-        )
+        ).apply {
+            gapStrategy = StaggeredGridLayoutManager.GAP_HANDLING_MOVE_ITEMS_BETWEEN_SPANS
+        }
         adapter = noteListAdapter
     }
 
-    private fun configureAddNoteFab() = with(noteListBinding) {
+    private fun configureAddNoteFabView() = with(noteListBinding) {
         addNoteView.shrink()
         addNoteView.setOnClickListener { navigateToNoteDetailCreate() }
     }
@@ -117,21 +131,29 @@ class NoteListFragment : Fragment() {
             Loading -> {}
             Empty -> {}
             is Error -> {}
-            is Success -> updateNoteListViewData(noteListUiState.data)
+            is Success -> updateNoteListViewData(notes = noteListUiState.data)
+            RemoveEmptyNoteSuccess -> showSnackBarLongMessage(
+                message = getString(alert_remove_empty_note)
+            )
         }
 
     private fun configureIntroducingAddNoteFabView() = with(noteListBinding) {
-        lifecycleScope.launch {
-            addNoteView.extend()
-            TimeUnit.SECONDS.toMillis(SECONDS_INTRODUCE_FAB_ACTION).let { secondsInMillis ->
-                delay(secondsInMillis)
-            }
-            addNoteView.shrink()
-        }
+        lifecycleScope.launchDelayed(
+            seconds = SECONDS_INTRODUCE_FAB_ACTION,
+            actionBefore = { addNoteView.extend() },
+            actionAfter = { addNoteView.shrink() }
+        )
     }
 
     private fun updateNoteListViewData(notes: List<NoteDomain>) =
         noteListAdapter.submitList(notes)
+
+    private fun removeEmptyNote(noteDomain: NoteDomain) =
+        noteListViewModel.performAction(RemoveNote(noteDomain))
+
+    private fun showNewNotesAtTop() = with(noteListBinding.notesView) {
+        smoothScrollToPosition(FIRST_POSITION)
+    }
 
     private fun navigateToNoteDetailEdit(note: NoteDomain, noteView: View) =
         navigateToNoteDetail(uiMode = NoteDetailUiMode.Edit(note), noteView)
@@ -152,6 +174,17 @@ class NoteListFragment : Fragment() {
 
     private fun buildNoteSharedElement(noteView: View): Pair<View, String> =
         noteView to getString(R.string.note_transition_name)
+
+    override fun onPause() {
+        super.onPause()
+        forceShowAddNoteFabView()
+    }
+
+    private fun forceShowAddNoteFabView() = with(noteListBinding.addNoteView) {
+        (layoutParams as CoordinatorLayout.LayoutParams).let { layoutParams ->
+            (layoutParams.behavior as? HideBottomViewOnScrollBehavior)?.slideUp(this)
+        }
+    }
 
     override fun onDestroy() {
         super.onDestroy()

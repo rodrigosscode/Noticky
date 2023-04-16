@@ -6,8 +6,12 @@ object NotesSampleDataSourceImpl {
 
     private val notes = ArrayList<NoteDomain>(sampleNotes)
 
-    fun delete(note: NoteDomain) {
-        notes.remove(note)
+    fun delete(note: NoteDomain): Boolean {
+        notes.find { it.id == note.id }?.let {
+            val position = notes.indexOf(it)
+            notes.removeAt(position)
+            return true
+        } ?: return false
     }
 
     fun updateOrInsert(note: NoteDomain): Boolean = try {
@@ -21,7 +25,7 @@ object NotesSampleDataSourceImpl {
     }
 
     private fun insert(note: NoteDomain): Boolean {
-        note.id = notes.count().toLong().plus(1)
+        note.id = notes.sumOf { it.id ?: 0 }.inc()
         notes.add(note)
         return true
     }

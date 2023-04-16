@@ -9,3 +9,7 @@ data class NoteDomain(
     var description: String = "",
     var id: Long? = null
 ) : Parcelable
+
+fun NoteDomain.isEmpty(): Boolean {
+    return title.isEmpty() && description.isEmpty()
+}

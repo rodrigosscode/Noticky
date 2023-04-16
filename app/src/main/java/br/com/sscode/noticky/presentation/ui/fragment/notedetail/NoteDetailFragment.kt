@@ -17,7 +17,8 @@ import br.com.sscode.noticky.presentation.ui.fragment.notedetail.mode.NoteDetail
 import br.com.sscode.noticky.presentation.ui.fragment.notedetail.mode.NoteDetailUiMode.Edit
 import br.com.sscode.noticky.presentation.ui.fragment.notedetail.viewmodel.NoteDetailViewModel
 import br.com.sscode.noticky.presentation.ui.fragment.notedetail.viewmodel.NoteDetailViewModel.UiAction.*
-import br.com.sscode.noticky.presentation.ui.fragment.notedetail.viewmodel.NoteDetailViewModel.UiState.*
+import br.com.sscode.noticky.presentation.ui.fragment.notedetail.viewmodel.NoteDetailViewModel.UiState.Introducing
+import br.com.sscode.noticky.presentation.ui.fragment.notedetail.viewmodel.NoteDetailViewModel.UiState.Loaded
 import br.com.sscode.ui.extension.getValueText
 import br.com.sscode.ui.extension.prepareEnterSharedElementWithLargeTransitions
 import timber.log.Timber

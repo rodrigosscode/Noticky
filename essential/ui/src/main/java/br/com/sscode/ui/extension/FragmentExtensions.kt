@@ -6,6 +6,7 @@ import androidx.core.view.doOnPreDraw
 import androidx.fragment.app.Fragment
 import br.com.sscode.iu.R
 import com.google.android.material.R.attr.colorSurface
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.MaterialContainerTransform
 import com.google.android.material.transition.MaterialElevationScale
 
@@ -30,4 +31,8 @@ fun Fragment.prepareEnterSharedElementWithLargeTransitions(@IdRes drawingContent
         scrimColor = Color.TRANSPARENT
         setAllContainerColors(requireContext().themeColor(colorSurface))
     }
+}
+
+fun Fragment.showSnackBarLongMessage(message: String) {
+    requireView().showSnackMessage(message, Snackbar.LENGTH_LONG)
 }

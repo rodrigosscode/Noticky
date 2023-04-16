@@ -19,10 +19,25 @@ class NoteListViewModel : ViewModel() {
 
     fun performAction(uiAction: UiAction) = when (uiAction) {
         UiAction.LoadNotes -> loadNotes()
+        is UiAction.RemoveNote -> removeNote(uiAction.noteDomain)
+    }
+
+    private fun removeNote(noteDomain: NoteDomain) {
+        dataSource.delete(noteDomain)
+        notifyRemoveEmptyNoteSuccess()
+        loadNotes()
+    }
+
+    private fun notifyRemoveEmptyNoteSuccess() {
+        onEmptyNoteRemoveSucceeded()
     }
 
     private fun loadNotes() {
-        onLoadNoteListSucceeded(dataSource.all().anotherInstance())
+        onLoadNoteListSucceeded(dataSource.all().anotherInstance().reversed())
+    }
+
+    private fun onEmptyNoteRemoveSucceeded() = viewModelScope.launch {
+        _uiState.emit(UiState.Loaded(noteListUiState = NoteListUiState.RemoveEmptyNoteSuccess))
     }
 
     private fun onLoadNoteListSucceeded(notes: List<NoteDomain>) = viewModelScope.launch {
@@ -43,9 +58,11 @@ class NoteListViewModel : ViewModel() {
         data class Success(
             val data: List<NoteDomain> = emptyList()
         ) : NoteListUiState()
+        object RemoveEmptyNoteSuccess : NoteListUiState()
     }
 
     sealed class UiAction {
         object LoadNotes : UiAction()
+        data class RemoveNote(val noteDomain: NoteDomain) : UiAction()
     }
 }
