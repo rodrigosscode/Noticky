@@ -48,7 +48,7 @@ class NoteListFragment : Fragment() {
             NoteListAdapter(
                 onNoteClick = ::navigateToNoteDetailEdit,
                 onEmptyNoteIdentified = ::removeEmptyNote,
-                onNewNoteIdentified = ::showNewNotesAtTop
+                onRequestPositionAtTop = ::positionNotesAtTop
             )
         }
     }
@@ -151,7 +151,7 @@ class NoteListFragment : Fragment() {
     private fun removeEmptyNote(noteDomain: NoteDomain) =
         noteListViewModel.performAction(RemoveNote(noteDomain))
 
-    private fun showNewNotesAtTop() = with(noteListBinding.notesView) {
+    private fun positionNotesAtTop() = with(noteListBinding.notesView) {
         smoothScrollToPosition(FIRST_POSITION)
     }
 

@@ -10,7 +10,7 @@ import br.com.sscode.noticky.domain.entity.isEmpty
 class NoteListAdapter(
     private val onNoteClick: (noteDomain: NoteDomain, noteView: View) -> Unit,
     private val onEmptyNoteIdentified: (noteDomain: NoteDomain) -> Unit,
-    private val onNewNoteIdentified: () -> Unit
+    private val onRequestPositionAtTop: () -> Unit
 ) : ListAdapter<NoteDomain, NoteListViewHolder>(NoteDiffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NoteListViewHolder =
@@ -32,7 +32,9 @@ class NoteListAdapter(
     ) {
         super.onCurrentListChanged(previousList, currentList)
         if (currentList.size > previousList.size) {
-            onNewNoteIdentified()
+            onRequestPositionAtTop()
+        } else if (!NoteDiffCallback.areItemsTheSame(previousList.first(), currentList.first())) {
+            onRequestPositionAtTop()
         }
     }
 
