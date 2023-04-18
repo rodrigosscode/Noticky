@@ -31,12 +31,25 @@ class NoteListAdapter(
         currentList: MutableList<NoteDomain>
     ) {
         super.onCurrentListChanged(previousList, currentList)
-        if (currentList.size > previousList.size) {
-            onRequestPositionAtTop()
-        } else if (!NoteDiffCallback.areItemsTheSame(previousList.first(), currentList.first())) {
+        if (isAddedNewItem(currentList, previousList) or
+            isFirstItemChanged(currentList, previousList)
+        ) {
             onRequestPositionAtTop()
         }
     }
+
+    private fun isFirstItemChanged(
+        currentList: MutableList<NoteDomain>,
+        previousList: MutableList<NoteDomain>
+    ) = currentList.size == previousList.size && !NoteDiffCallback.areItemsTheSame(
+        previousList.first(),
+        currentList.first()
+    )
+
+    private fun isAddedNewItem(
+        currentList: MutableList<NoteDomain>,
+        previousList: MutableList<NoteDomain>
+    ) = currentList.size > previousList.size
 
     object NoteDiffCallback : DiffUtil.ItemCallback<NoteDomain>() {
 
