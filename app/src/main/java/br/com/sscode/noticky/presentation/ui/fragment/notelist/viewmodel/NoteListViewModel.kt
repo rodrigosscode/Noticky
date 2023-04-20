@@ -33,7 +33,13 @@ class NoteListViewModel : ViewModel() {
     }
 
     private fun loadNotes() {
-        onLoadNoteListSucceeded(dataSource.all().anotherInstance().reversed())
+        dataSource.all().anotherInstance().reversed().let {
+            if (it.isEmpty()) {
+                onLoadNoteListEmpty()
+            } else {
+                onLoadNoteListSucceeded(it)
+            }
+        }
     }
 
     private fun onEmptyNoteRemoveSucceeded() = viewModelScope.launch {
@@ -42,6 +48,10 @@ class NoteListViewModel : ViewModel() {
 
     private fun onLoadNoteListSucceeded(notes: List<NoteDomain>) = viewModelScope.launch {
         _uiState.emit(UiState.Loaded(noteListUiState = NoteListUiState.Success(data = notes)))
+    }
+
+    private fun onLoadNoteListEmpty() = viewModelScope.launch {
+        _uiState.emit(UiState.Loaded(noteListUiState = NoteListUiState.Empty))
     }
 
     fun isAlreadyIntroduced(): Boolean = _uiState.value != UiState.Introducing

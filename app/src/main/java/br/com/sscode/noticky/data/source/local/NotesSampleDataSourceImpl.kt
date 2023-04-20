@@ -4,7 +4,8 @@ import br.com.sscode.noticky.domain.entity.NoteDomain
 
 object NotesSampleDataSourceImpl {
 
-    private val notes = ArrayList<NoteDomain>(sampleNotes)
+    private val notes = ArrayList<NoteDomain>(emptyList())
+//    private val notes = ArrayList<NoteDomain>(sampleNotes)
 
     fun delete(note: NoteDomain): Boolean {
         notes.find { it.id == note.id }?.let {

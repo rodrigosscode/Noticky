@@ -56,4 +56,5 @@
     <!-- NOTE LIST -->
     <string name="add_note_content_description">Adicionar Note</string>
     <string name="alert_remove_empty_note">Nota vazia removida</string>
+    <string name="alert_empty_note_data">Você não possui notas criadas</string>
 </resources>

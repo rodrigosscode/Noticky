@@ -9,7 +9,8 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import br.com.sscode.noticky.R
+import br.com.sscode.noticky.R.drawable.ic_back_screen
+import br.com.sscode.noticky.R.id.nav_host_fragment
 import br.com.sscode.noticky.databinding.FragmentNoteDetailBinding
 import br.com.sscode.noticky.domain.entity.NoteDomain
 import br.com.sscode.noticky.presentation.ui.fragment.notedetail.mode.NoteDetailUiMode
@@ -37,7 +38,7 @@ class NoteDetailFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) = try {
         super.onCreate(savedInstanceState)
-        prepareEnterSharedElementWithLargeTransitions(R.id.nav_host_fragment)
+        prepareEnterSharedElementWithLargeTransitions(nav_host_fragment)
     } catch (exception: Exception) {
         Timber.e(exception)
     }
@@ -72,7 +73,7 @@ class NoteDetailFragment : Fragment() {
     }
 
     private fun setupToolbarView() = with(noteDetailBinding.toolbarView) {
-        setNavigationIcon(R.drawable.ic_back_screen)
+        setNavigationIcon(ic_back_screen)
         setNavigationOnClickListener { onBackPressed() }
     }
 

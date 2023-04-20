@@ -25,10 +25,7 @@ import br.com.sscode.noticky.presentation.ui.fragment.notelist.viewmodel.NoteLis
 import br.com.sscode.noticky.presentation.ui.fragment.notelist.viewmodel.NoteListViewModel.UiAction.RemoveNote
 import br.com.sscode.noticky.presentation.ui.fragment.notelist.viewmodel.NoteListViewModel.UiState.Introducing
 import br.com.sscode.noticky.presentation.ui.fragment.notelist.viewmodel.NoteListViewModel.UiState.Loaded
-import br.com.sscode.ui.extension.launchDelayed
-import br.com.sscode.ui.extension.prepareEnterExitWithLargeScaleTransitions
-import br.com.sscode.ui.extension.resetSharedElementTransitionState
-import br.com.sscode.ui.extension.showSnackBarLongMessage
+import br.com.sscode.ui.extension.*
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import kotlinx.coroutines.flow.collectLatest
 import timber.log.Timber
@@ -129,13 +126,26 @@ class NoteListFragment : Fragment() {
     private fun configureNoteListByState(noteListUiState: NoteListUiState) =
         when (noteListUiState) {
             Loading -> {}
-            Empty -> {}
+            Empty -> updateViewVisibilityForNoteListEmpty()
             is Error -> {}
-            is Success -> updateNoteListViewData(notes = noteListUiState.data)
+            is Success -> {
+                updateViewVisibilityForNoteListSuccess()
+                updateNoteListViewData(notes = noteListUiState.data)
+            }
             RemoveEmptyNoteSuccess -> showSnackBarLongMessage(
                 message = getString(alert_remove_empty_note)
             )
         }
+
+    private fun updateViewVisibilityForNoteListSuccess() = with(noteListBinding) {
+        emptyDataStub.setGone()
+        notesView.setVisible()
+    }
+
+    private fun updateViewVisibilityForNoteListEmpty() = with(noteListBinding) {
+        emptyDataStub.setVisibleOrInflate()
+        notesView.setInvisible()
+    }
 
     private fun configureIntroducingAddNoteFabView() = with(noteListBinding) {
         lifecycleScope.launchDelayed(
