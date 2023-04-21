@@ -13,6 +13,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import br.com.sscode.core.FIRST_POSITION
 import br.com.sscode.noticky.R
+import br.com.sscode.noticky.R.id.noteListFragment
 import br.com.sscode.noticky.R.string.alert_remove_empty_note
 import br.com.sscode.noticky.databinding.FragmentNoteListBinding
 import br.com.sscode.noticky.domain.entity.NoteDomain
@@ -158,28 +159,48 @@ class NoteListFragment : Fragment() {
     private fun updateNoteListViewData(notes: List<NoteDomain>) =
         noteListAdapter.submitList(notes)
 
-    private fun removeEmptyNote(noteDomain: NoteDomain) =
+    private fun removeEmptyNote(noteDomain: NoteDomain) = try {
         noteListViewModel.performAction(RemoveNote(noteDomain))
-
-    private fun positionNotesAtTop() = with(noteListBinding.notesView) {
-        smoothScrollToPosition(FIRST_POSITION)
+    } catch (exception: Exception) {
+        Timber.e(exception)
     }
 
-    private fun navigateToNoteDetailEdit(note: NoteDomain, noteView: View) =
-        navigateToNoteDetail(uiMode = NoteDetailUiMode.Edit(note), noteView)
+    private fun positionNotesAtTop() = try {
+        noteListBinding.notesView.smoothScrollToPosition(FIRST_POSITION)
+    } catch (exception: Exception) {
+        Timber.e(exception)
+    }
 
-    private fun navigateToNoteDetailCreate() =
+    private fun navigateToNoteDetailEdit(note: NoteDomain, noteView: View) = try {
+        navigateToNoteDetail(uiMode = NoteDetailUiMode.Edit(note), noteView)
+    } catch (exception: Exception) {
+        Timber.e(exception)
+    }
+
+    private fun navigateToNoteDetailCreate() = try {
         navigateToNoteDetail(uiMode = NoteDetailUiMode.Create)
+    } catch (exception: Exception) {
+        Timber.e(exception)
+    }
 
     private fun navigateToNoteDetail(
         uiMode: NoteDetailUiMode,
         noteView: View? = null
     ) = with(findNavController()) {
-        NoteListFragmentDirections.actionToNoteDetail(uiMode).let { navDirection ->
-            noteView?.let {
-                navigate(navDirection, FragmentNavigatorExtras(buildNoteSharedElement(noteView)))
-            } ?: navigate(navDirection)
+        if (isCurrentDestination()) {
+            NoteListFragmentDirections.actionToNoteDetail(uiMode).let { navDirection ->
+                noteView?.let {
+                    navigate(
+                        navDirection,
+                        FragmentNavigatorExtras(buildNoteSharedElement(noteView))
+                    )
+                } ?: navigate(navDirection)
+            }
         }
+    }
+
+    private fun isCurrentDestination() = with(findNavController()) {
+        currentDestination?.id == noteListFragment
     }
 
     private fun buildNoteSharedElement(noteView: View): Pair<View, String> =

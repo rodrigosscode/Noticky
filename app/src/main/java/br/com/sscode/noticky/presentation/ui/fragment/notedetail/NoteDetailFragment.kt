@@ -108,13 +108,19 @@ class NoteDetailFragment : Fragment() {
             noteDescriptionView.setText(noteDescription)
         }
 
-    private fun onBackPressed() = with(findNavController()) {
-        navigateUp() || popBackStack()
+    private fun onBackPressed() = try {
+        with(findNavController()) {
+            navigateUp() || popBackStack()
+        }
+    } catch (exception: Exception) {
+        Timber.e(exception)
     }
 
-    override fun onPause() {
+    override fun onPause() = try {
         super.onPause()
         updateNote()
+    } catch (exception: Exception) {
+        Timber.e(exception)
     }
 
     private fun updateNote() {
