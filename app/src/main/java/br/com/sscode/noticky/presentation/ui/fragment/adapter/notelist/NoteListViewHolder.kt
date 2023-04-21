@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import br.com.sscode.noticky.R
 import br.com.sscode.noticky.databinding.ListNoteItemBinding
 import br.com.sscode.noticky.domain.entity.NoteDomain
+import br.com.sscode.noticky.domain.entity.extension.isEmpty
 import timber.log.Timber
 
 private const val TAG_EVENT_CLICK_NOTE = "onNoteClick"
@@ -18,11 +19,16 @@ class NoteListViewHolder(
 
     fun bind(
         noteDomain: NoteDomain,
+        onEmptyNoteIdentified: (noteDomain: NoteDomain) -> Unit,
         onNoteClick: (noteDomain: NoteDomain, noteView: View) -> Unit
-    ) = with(binding) {
-        configureDisplayFields(noteDomain)
-        configureListeners(onNoteClick, noteDomain)
-        configureTransitions(noteDomain)
+    ) {
+        if (noteDomain.isEmpty()) {
+            onEmptyNoteIdentified(noteDomain)
+        } else {
+            configureDisplayFields(noteDomain)
+            configureListeners(onNoteClick, noteDomain)
+            configureTransitions(noteDomain)
+        }
     }
 
     private fun configureDisplayFields(noteDomain: NoteDomain) = with(binding) {

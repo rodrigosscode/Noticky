@@ -1,13 +1,15 @@
 package br.com.sscode.noticky.data.source.local
 
 import br.com.sscode.noticky.domain.entity.NoteDomain
+import timber.log.Timber
 
 object NotesSampleDataSourceImpl {
 
-    private val notes = ArrayList<NoteDomain>(emptyList())
-//    private val notes = ArrayList<NoteDomain>(sampleNotes)
+//    private val notes = ArrayList<NoteDomain>(emptyList())
+    private val notes = ArrayList<NoteDomain>(sampleNotes)
 
     fun delete(note: NoteDomain): Boolean {
+        Timber.i("Delete note")
         notes.find { it.id == note.id }?.let {
             val position = notes.indexOf(it)
             notes.removeAt(position)
@@ -16,6 +18,7 @@ object NotesSampleDataSourceImpl {
     }
 
     fun updateOrInsert(note: NoteDomain): Boolean = try {
+        Timber.i("Updating note")
         note.id?.let { noteId ->
             update(noteId, note)
         } ?: run {

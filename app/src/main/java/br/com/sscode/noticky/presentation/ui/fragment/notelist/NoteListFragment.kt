@@ -206,14 +206,18 @@ class NoteListFragment : Fragment() {
     private fun buildNoteSharedElement(noteView: View): Pair<View, String> =
         noteView to getString(R.string.note_transition_name)
 
-    override fun onPause() {
+    override fun onPause() = try {
         super.onPause()
         forceShowAddNoteFabView()
+    } catch (exception: Exception) {
+        Timber.e(exception)
     }
 
-    private fun forceShowAddNoteFabView() = with(noteListBinding.addNoteView) {
-        (layoutParams as CoordinatorLayout.LayoutParams).let { layoutParams ->
-            (layoutParams.behavior as? HideBottomViewOnScrollBehavior)?.slideUp(this)
+    private fun forceShowAddNoteFabView() {
+        with(noteListBinding.addNoteView) {
+            (layoutParams as CoordinatorLayout.LayoutParams).let { layoutParams ->
+                (layoutParams.behavior as? HideBottomViewOnScrollBehavior)?.slideUp(this)
+            }
         }
     }
 

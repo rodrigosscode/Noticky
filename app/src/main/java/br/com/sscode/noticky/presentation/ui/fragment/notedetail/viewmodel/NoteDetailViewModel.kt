@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.sscode.noticky.data.source.local.NotesSampleDataSourceImpl
 import br.com.sscode.noticky.domain.entity.NoteDomain
+import br.com.sscode.noticky.domain.entity.extension.areItemTheSame
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,11 +13,11 @@ import kotlinx.coroutines.launch
 class NoteDetailViewModel : ViewModel() {
 
     private val dataSource = NotesSampleDataSourceImpl
+    private var originalDataNote: NoteDomain? = null
+    private var currentDataNote: NoteDomain? = null
 
     private var _uiState: MutableStateFlow<UiState> = MutableStateFlow(UiState.Introducing)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
-
-    private var currentDataNote: NoteDomain? = null
 
     fun performAction(action: UiAction) {
         when (action) {
@@ -25,6 +26,7 @@ class NoteDetailViewModel : ViewModel() {
                 onLoadNoteSucceeded()
             }
             is UiAction.LoadNote -> {
+                setOriginalDataNote(action.data)
                 setCurrentDataNote(action.data)
                 onLoadNoteSucceeded()
             }
@@ -34,20 +36,38 @@ class NoteDetailViewModel : ViewModel() {
         }
     }
 
-    private fun setCurrentDataNote(note: NoteDomain) {
+    private fun setOriginalDataNote(note: NoteDomain) {
+        originalDataNote = note
+    }
+
+    private fun setCurrentDataNote(note: NoteDomain): NoteDomain {
         currentDataNote = note
+        return note
     }
 
     private fun updateNote(title: String, description: String) {
         currentDataNote?.run {
-            setCurrentDataNote(copy(title = title, description = description))
-            currentDataNote?.let { note ->
-                if (dataSource.updateOrInsert(note)) {
-                    onLoadNoteSucceeded()
+            setCurrentDataNote(
+                copy(
+                    title = title,
+                    description = description
+                )
+            ).let { currentDataNoteUpdated ->
+                if (isNeededUpdateNote()) {
+                    if (dataSource.updateOrInsert(currentDataNoteUpdated)) {
+                        onLoadNoteSucceeded()
+                    }
                 }
             }
         }
     }
+
+    private fun isNeededUpdateNote(): Boolean =
+        currentDataNote?.let { currentDataNote ->
+            originalDataNote?.let { originalDataNote ->
+                !currentDataNote.areItemTheSame(originalDataNote)
+            } ?: true
+        } ?: false
 
     private fun onLoadNoteSucceeded() = viewModelScope.launch {
         currentDataNote?.let { note ->

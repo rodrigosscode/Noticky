@@ -5,7 +5,9 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import br.com.sscode.noticky.domain.entity.NoteDomain
-import br.com.sscode.noticky.domain.entity.isEmpty
+import br.com.sscode.noticky.domain.entity.extension.areContentTheSame
+import br.com.sscode.noticky.domain.entity.extension.areItemTheSame
+import timber.log.Timber
 
 class NoteListAdapter(
     private val onNoteClick: (noteDomain: NoteDomain, noteView: View) -> Unit,
@@ -17,12 +19,12 @@ class NoteListAdapter(
         NoteListViewHolder.create(viewGroupParent = parent)
 
     override fun onBindViewHolder(holder: NoteListViewHolder, position: Int) {
-        getItem(position).let { noteDomain ->
-            if (noteDomain.isEmpty()) {
-                onEmptyNoteIdentified(noteDomain)
-            } else {
-                holder.bind(noteDomain, onNoteClick)
+        try {
+            getItem(position).let { noteDomain ->
+                holder.bind(noteDomain, onEmptyNoteIdentified, onNoteClick)
             }
+        } catch (exception: Exception) {
+            Timber.e(exception)
         }
     }
 
@@ -30,11 +32,15 @@ class NoteListAdapter(
         previousList: MutableList<NoteDomain>,
         currentList: MutableList<NoteDomain>
     ) {
-        super.onCurrentListChanged(previousList, currentList)
-        if (isAddedNewItem(currentList, previousList) or
-            isFirstItemChanged(currentList, previousList)
-        ) {
-            onRequestPositionAtTop()
+        try {
+            super.onCurrentListChanged(previousList, currentList)
+            if (isAddedNewItem(currentList, previousList) or
+                isFirstItemChanged(currentList, previousList)
+            ) {
+                onRequestPositionAtTop()
+            }
+        } catch (exception: Exception) {
+            Timber.e(exception)
         }
     }
 
@@ -54,9 +60,9 @@ class NoteListAdapter(
     object NoteDiffCallback : DiffUtil.ItemCallback<NoteDomain>() {
 
         override fun areItemsTheSame(oldItem: NoteDomain, newItem: NoteDomain): Boolean =
-            oldItem.title == newItem.title && oldItem.description == newItem.description
+            oldItem.areItemTheSame(newItem)
 
         override fun areContentsTheSame(oldItem: NoteDomain, newItem: NoteDomain): Boolean =
-            oldItem == newItem
+            oldItem.areContentTheSame(newItem)
     }
 }
