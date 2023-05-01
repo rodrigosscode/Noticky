@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <!-- Base application theme. -->
     <style name="Base.Theme.Noticky" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your dark theme here. -->
@@ -8,4 +8,41 @@
         <item name="android:textColor">@color/white</item>
         <item name="colorControlActivated">@color/yellow</item>
     </style>
+
+    <!-- START. SEARCH THEME -->
+
+    <style name="Noticky.SearchBar" parent="TextAppearance.Material3.SearchBar">
+        <item name="android:textAppearance">@style/Noticky.TextAppearance.Material3.SearchBar</item>
+        <item name="android:backgroundTint">@color/black</item>
+    </style>
+
+    <style name="Noticky.TextAppearance.Material3.SearchBar" parent="Base.TextAppearance.Material3.Search">
+        <item name="android:textAppearance">@macro/m3_comp_search_bar_input_text_type</item>
+        <item name="android:textColor">@macro/m3_comp_search_bar_input_text_color</item>
+        <item name="android:textColorHint">?android:attr/textColorPrimary</item>
+    </style>
+
+    <style name="Noticky.SearchViewTheme" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/black</item>
+        <item name="colorPrimaryContainer">@color/black</item>
+        <item name="colorOnPrimaryContainer">@color/black</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="colorControlActivated">?android:attr/textColorPrimary</item>
+    </style>
+
+    <style name="Noticky.SearchView" parent="Widget.Material3.SearchView">
+        <item name="android:textAppearance">
+            @style/Noticky.TextAppearance.Material3.SearchView
+        </item>
+        <item name="divider">@color/white</item>
+    </style>
+
+    <style name="Noticky.TextAppearance.Material3.SearchView" parent="Base.TextAppearance.Material3.Search">
+        <item name="android:textAppearance">@macro/m3_comp_search_view_header_input_text_type</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textColorHint">?android:attr/textColorPrimary</item>
+    </style>
+
+    <!-- END. SEARCH THEME -->
+
 </resources>

@@ -1,30 +1,24 @@
 package br.com.sscode.noticky.presentation.ui.activity
 
-import android.content.res.Configuration
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.WindowCompat
-import androidx.navigation.NavController
-import androidx.navigation.NavDestination
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
-import androidx.navigation.ui.setupActionBarWithNavController
 import br.com.sscode.noticky.R
-import br.com.sscode.noticky.databinding.ActivityMainBinding
-import com.google.android.material.snackbar.Snackbar
+import br.com.sscode.noticky.databinding.ActivityMainAppBinding
 
-class MainActivity : AppCompatActivity() {
+class AppMainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
-    private lateinit var binding: ActivityMainBinding
+    private lateinit var binding: ActivityMainAppBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
 //        WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater)
+        binding = ActivityMainAppBinding.inflate(layoutInflater)
         setContentView(binding.root)
     }
 

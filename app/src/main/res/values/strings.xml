@@ -57,4 +57,8 @@
     <string name="add_note_content_description">Adicionar Note</string>
     <string name="alert_remove_empty_note">Nota vazia removida</string>
     <string name="alert_empty_note_data">Você não possui notas criadas</string>
+    <string name="search_notes_hint">Pesquisar Notes</string>
+    <string name="search_created_notes_content_description">Realizar a pesquisa de suas notes criadas</string>
+    <string name="notifications">Notificações</string>
+    <string name="settings">Configurações</string>
 </resources>

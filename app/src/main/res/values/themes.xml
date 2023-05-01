@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <!-- Base application theme. -->
     <style name="Base.Theme.Noticky" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
@@ -9,6 +9,10 @@
     </style>
 
     <style name="Theme.Noticky" parent="Base.Theme.Noticky" />
+
+    <style name="Theme.Noticky.FitWindows" parent="Theme.Noticky">
+        <item name="android:fitsSystemWindows">true</item>
+    </style>
 
     <style name="Noticky.EditText" parent="Theme.Noticky">
         <item name="android:background">@null</item>
@@ -21,5 +25,40 @@
     <style name="Noticky.EditText.Regular" parent="Noticky.EditText">
         <item name="fontFamily">@font/poppins_regular</item>
     </style>
+
+    <!-- START. SEARCH THEME -->
+
+    <style name="Noticky.SearchBar" parent="Widget.Material3.SearchBar">
+        <item name="android:textAppearance">@style/Noticky.TextAppearance.Material3.SearchBar</item>
+        <item name="android:backgroundTint">@color/grey</item>
+    </style>
+
+    <style name="Noticky.TextAppearance.Material3.SearchBar" parent="Base.TextAppearance.Material3.Search">
+        <item name="android:textAppearance">@macro/m3_comp_search_bar_input_text_type</item>
+        <item name="android:textColor">@macro/m3_comp_search_bar_input_text_color</item>
+        <item name="android:textColorHint">?android:attr/textColorPrimary</item>
+    </style>
+
+    <style name="Noticky.SearchViewTheme" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">@color/white</item>
+        <item name="colorOnPrimaryContainer">@color/white</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="colorControlActivated">?android:attr/textColorPrimary</item>
+    </style>
+
+    <style name="Noticky.SearchView" parent="Widget.Material3.SearchView">
+        <item name="android:textAppearance">
+            @style/Noticky.TextAppearance.Material3.SearchView
+        </item>
+    </style>
+
+    <style name="Noticky.TextAppearance.Material3.SearchView" parent="Base.TextAppearance.Material3.Search">
+        <item name="android:textAppearance">@macro/m3_comp_search_view_header_input_text_type</item>
+        <item name="android:textColor">@macro/m3_comp_search_view_header_input_text_color</item>
+        <item name="android:textColorHint">?android:attr/textColorPrimary</item>
+    </style>
+
+    <!-- END. SEARCH THEME -->
 
 </resources>

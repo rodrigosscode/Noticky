@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.addCallback
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -21,17 +22,31 @@ import br.com.sscode.noticky.presentation.ui.fragment.adapter.notelist.NoteListA
 import br.com.sscode.noticky.presentation.ui.fragment.notedetail.mode.NoteDetailUiMode
 import br.com.sscode.noticky.presentation.ui.fragment.notelist.viewmodel.NoteListViewModel
 import br.com.sscode.noticky.presentation.ui.fragment.notelist.viewmodel.NoteListViewModel.NoteListUiState
-import br.com.sscode.noticky.presentation.ui.fragment.notelist.viewmodel.NoteListViewModel.NoteListUiState.*
+import br.com.sscode.noticky.presentation.ui.fragment.notelist.viewmodel.NoteListViewModel.NoteListUiState.Empty
+import br.com.sscode.noticky.presentation.ui.fragment.notelist.viewmodel.NoteListViewModel.NoteListUiState.Loading
+import br.com.sscode.noticky.presentation.ui.fragment.notelist.viewmodel.NoteListViewModel.NoteListUiState.Success
+import br.com.sscode.noticky.presentation.ui.fragment.notelist.viewmodel.NoteListViewModel.NoteListUiState.Error
+import br.com.sscode.noticky.presentation.ui.fragment.notelist.viewmodel.NoteListViewModel.NoteListUiState.RemoveEmptyNoteSuccess
 import br.com.sscode.noticky.presentation.ui.fragment.notelist.viewmodel.NoteListViewModel.UiAction.LoadNotes
 import br.com.sscode.noticky.presentation.ui.fragment.notelist.viewmodel.NoteListViewModel.UiAction.RemoveNote
 import br.com.sscode.noticky.presentation.ui.fragment.notelist.viewmodel.NoteListViewModel.UiState.Introducing
 import br.com.sscode.noticky.presentation.ui.fragment.notelist.viewmodel.NoteListViewModel.UiState.Loaded
-import br.com.sscode.ui.extension.*
+import br.com.sscode.ui.extension.setInvisible
+import br.com.sscode.ui.extension.setVisible
+import br.com.sscode.ui.extension.setGone
+import br.com.sscode.ui.extension.showSnackBarLongMessage
+import br.com.sscode.ui.extension.setVisibleOrInflate
+import br.com.sscode.ui.extension.isCurrentDestination
+import br.com.sscode.ui.extension.prepareEnterExitWithLargeScaleTransitions
+import br.com.sscode.ui.extension.resetSharedElementTransitionState
+import br.com.sscode.ui.extension.launchDelayed
+import br.com.sscode.ui.navigation.NavigationDestination
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
+import com.google.android.material.search.SearchView
 import kotlinx.coroutines.flow.collectLatest
 import timber.log.Timber
 
-class NoteListFragment : Fragment() {
+class NoteListFragment : Fragment(), NavigationDestination {
 
     private var _noteListBinding: FragmentNoteListBinding? = null
     private val noteListBinding: FragmentNoteListBinding
@@ -50,6 +65,8 @@ class NoteListFragment : Fragment() {
             )
         }
     }
+
+    override fun getDestinationId(): Int = noteListFragment
 
     override fun onCreate(savedInstanceState: Bundle?) = try {
         super.onCreate(savedInstanceState)
@@ -79,10 +96,13 @@ class NoteListFragment : Fragment() {
         try {
             super.onViewCreated(view, savedInstanceState)
             resetSharedElementTransitionState()
+            configureOnBackPressedDispatcher()
             if (isViewBindingReusable) {
                 initObserverViewState()
                 noteListViewModel.performAction(LoadNotes)
             } else {
+                configureToolbarView()
+                configureNotesSearchView()
                 configureNotesRecyclerView()
                 configureAddNoteFabView()
                 initObserverViewState()
@@ -92,6 +112,31 @@ class NoteListFragment : Fragment() {
             }
         } catch (exception: Exception) {
             Timber.e(exception)
+        }
+    }
+
+    private fun configureToolbarView() = with(noteListBinding) {
+        toolbar.inflateMenu(R.menu.menu_note_list)
+    }
+
+    private fun configureOnBackPressedDispatcher() = with(noteListBinding) {
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            searchViewNotes.currentTransitionState.let { searchViewState ->
+                if (searchViewState == SearchView.TransitionState.SHOWING ||
+                    searchViewState == SearchView.TransitionState.SHOWN
+                ) {
+                    searchBar.text = searchViewNotes.text
+                    searchViewNotes.hide()
+                }
+            }
+        }
+    }
+
+    private fun configureNotesSearchView() = with(noteListBinding) {
+        searchViewNotes.editText.setOnEditorActionListener { _, _, _ ->
+            searchBar.text = searchViewNotes.text
+            searchViewNotes.hide()
+            return@setOnEditorActionListener false
         }
     }
 
@@ -187,7 +232,7 @@ class NoteListFragment : Fragment() {
         uiMode: NoteDetailUiMode,
         noteView: View? = null
     ) = with(findNavController()) {
-        if (isCurrentDestination()) {
+        if (isCurrentDestination(this)) {
             NoteListFragmentDirections.actionToNoteDetail(uiMode).let { navDirection ->
                 noteView?.let {
                     navigate(
@@ -197,10 +242,6 @@ class NoteListFragment : Fragment() {
                 } ?: navigate(navDirection)
             }
         }
-    }
-
-    private fun isCurrentDestination() = with(findNavController()) {
-        currentDestination?.id == noteListFragment
     }
 
     private fun buildNoteSharedElement(noteView: View): Pair<View, String> =

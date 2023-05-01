@@ -17,9 +17,11 @@ class NoteListViewModel : ViewModel() {
     private val _uiState: MutableStateFlow<UiState> = MutableStateFlow(UiState.Introducing)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
-    fun performAction(uiAction: UiAction) = when (uiAction) {
-        UiAction.LoadNotes -> loadNotes()
-        is UiAction.RemoveNote -> removeNote(uiAction.noteDomain)
+    fun performAction(uiAction: UiAction) {
+        when (uiAction) {
+            UiAction.LoadNotes -> loadNotes()
+            is UiAction.RemoveNote -> removeNote(uiAction.noteDomain)
+        }
     }
 
     private fun removeNote(noteDomain: NoteDomain) {
